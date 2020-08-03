@@ -1,27 +1,104 @@
-# NgrxComponentStore
+A minimalistic example of `@ngrx/component` compilation problem.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.1.
+@angular/cli 10.0.5
+@angular/core 10.0.7
 
-## Development server
+I observed the same behaviour in Angular 9 too.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+The repository contains `lib` project that relies on `@ngrx/component`. Since Ivy isnstill isn't recommended for Angular libraries, `"enableIvy": false` flag is set. 
 
-## Code scaffolding
+To reproduce the proble, just compile the library:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```
 
-## Build
+npm i
+ng build lib
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+```
 
-## Running unit tests
+I receive the following error:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```
 
-## Running end-to-end tests
+ERROR: Unexpected value 'undefined' exported by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Unexpected value 'undefined' declared by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Can't bind to 'ngrxLet' since it isn't a known property of 'ng-container'.
+1. If 'ngrxLet' is an Angular directive, then add 'CommonModule' to the '@NgModule.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component. ("
+    <ng-container [ERROR ->]*ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
+Property binding ngrxLet not used by any directive on an embedded template. Make sure that the property name is spelled correctly and all directives are listed in the "@NgModule.declarations". ("
+    [ERROR ->]<ng-container *ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+An unhandled exception occurred: Unexpected value 'undefined' exported by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Unexpected value 'undefined' declared by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Can't bind to 'ngrxLet' since it isn't a known property of 'ng-container'.
+1. If 'ngrxLet' is an Angular directive, then add 'CommonModule' to the '@NgModule.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component. ("
+    <ng-container [ERROR ->]*ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
+Property binding ngrxLet not used by any directive on an embedded template. Make sure that the property name is spelled correctly and all directives are listed in the "@NgModule.declarations". ("
+    [ERROR ->]<ng-container *ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
 
-## Further help
+See "/private/var/folders/r0/1jtc15ss6lq67nnmykxbkb500000gn/T/ng-2cuSau/angular-errors.log" for further details.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+```
+
+Basically it can't import `ReactiveComponentModule`. 
+
+The content of the log file:
+
+```
+
+[error] Error: Unexpected value 'undefined' exported by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Unexpected value 'undefined' declared by the module 'ReactiveComponentModule in /Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/@ngrx/component/ngrx-component.d.ts'
+Can't bind to 'ngrxLet' since it isn't a known property of 'ng-container'.
+1. If 'ngrxLet' is an Angular directive, then add 'CommonModule' to the '@NgModule.imports' of this component.
+2. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component. ("
+    <ng-container [ERROR ->]*ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
+Property binding ngrxLet not used by any directive on an embedded template. Make sure that the property name is spelled correctly and all directives are listed in the "@NgModule.declarations". ("
+    [ERROR ->]<ng-container *ngrxLet="data$ as data">
+      <p>lib works! {{ data }}</p>
+    </ng-container>
+")
+
+    at Object.<anonymous> (/Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/ng-packagr/lib/ngc/compile-source-files.js:71:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (/Users/karpovad/recogizer/sandbox/ngrx-component-store/node_modules/ng-packagr/lib/ngc/compile-source-files.js:5:58)
+
+```
+
+As a super urgent work around for this problem, I created a library in our internal repo with the same code but I removed all barrel files (`index.ts`), and it worked for me:
+
+```
+
+.
+├── lib
+│   ├── core
+│   │   ├── cd-aware
+│   │   │   ├── cd-aware_creator.ts
+│   │   │   └── creator_render.ts
+│   │   └── utils
+│   │       └── has-zone.ts
+│   ├── let
+│   │   └── let.directive.ts
+│   ├── push
+│   │   └── push.pipe.ts
+│   └── reactive-component.module.ts
+└── public-api.ts
+
+```
