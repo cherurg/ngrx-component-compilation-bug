@@ -5,9 +5,9 @@ A minimalistic example of `@ngrx/component` compilation problem.
 
 I observed the same behaviour in Angular 9 too.
 
-The repository contains `lib` project that relies on `@ngrx/component`. Since Ivy isnstill isn't recommended for Angular libraries, `"enableIvy": false` flag is set. 
+The repository contains `lib` project that relies on `@ngrx/component`. Since Ivy isnstill isn't recommended for Angular libraries, `"enableIvy": false` flag is set ([1](https://github.com/cherurg/ngrx-component-compilation-bug/blob/master/projects/lib/tsconfig.lib.json#L15), [2](https://github.com/cherurg/ngrx-component-compilation-bug/blob/master/projects/lib/tsconfig.lib.prod.json#L4)). 
 
-To reproduce the proble, just compile the library:
+To reproduce the problem just compile the library:
 
 ```
 
@@ -82,7 +82,7 @@ Property binding ngrxLet not used by any directive on an embedded template. Make
 
 ```
 
-As a super urgent work around for this problem, I created a library in our internal repo with the same code but I removed all barrel files (`index.ts`), and it worked for me:
+As a super urgent workaround for this problem, I created a library internally with the same code but I removed all barrel files (`index.ts`), and it worked for me:
 
 ```
 
