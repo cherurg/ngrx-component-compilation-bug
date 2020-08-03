@@ -1,3 +1,5 @@
+See https://github.com/ngrx/platform/issues/2643
+
 A minimalistic example of `@ngrx/component` compilation problem.
 
 @angular/cli 10.0.5
